@@ -64,7 +64,7 @@ class lru_dict(MutableMapping):
         if size < 1:
             raise ValueError("cache size must be =< 1")
 
-        self.__size = size
+        self._size = size
         self._stack = []
         self._data = {}
 
@@ -76,7 +76,7 @@ class lru_dict(MutableMapping):
     @property
     def size(self):
         "Current size of cache."
-        return self.__size
+        return self._size
 
     @size.setter
     def size(self, *args):
@@ -120,7 +120,7 @@ class lru_dict(MutableMapping):
         if new_size < 1:
             raise ValueError("cache size must be =< 1")
 
-        self.__size = new_size
+        self._size = new_size
 
         if len(self) > self.size:
             # partition at the new size and remove all LRU items

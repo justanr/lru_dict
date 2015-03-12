@@ -1,4 +1,32 @@
-from collections import MutableMapping
+from collections import MutableMapping, Mapping, KeysView, ItemsView, ValuesView
+
+class ProxiedPeek(Mapping):
+    """Helper class for iteration over lru_dicts
+
+    The various ValuesView and ItemsView invoke `__getitem__` on
+    the passed mapping, which alters the state of the LRU cache.
+
+    By proxying through a mapping that'll invoke the `peek` method,
+    the LRU order is preserved at some cost in preformance.
+    """
+    def __init__(self, proxied):
+        self.__proxied = proxied
+        super(ProxiedPeek, self).__init__()
+
+    def __getitem__(self, key):
+        return self.__proxied.peek(key)
+
+    def __iter__(self):
+        return iter(self.__proxied)
+
+    def __contains__(self, value):
+        return value in self.__proxied
+
+    def __len__(self):
+        return len(self.__proxied)
+
+    def __repr__(self):
+        return "<Proxied {!r}>".format(self.__proxied)
 
 class lru_dict(MutableMapping):
     """A dict/stack implementation of LRU.
@@ -147,3 +175,22 @@ class lru_dict(MutableMapping):
 
     def __iter__(self):
         return iter(self._stack)
+
+    # pass a ProxiedPeek instance to ValuesView and ItemsView
+    # to not mess up LRU order since they both invoke __getitem__
+    # returning a view over the mapping is consistent with
+    # the behavior in other mappings rather returning a custom iterator
+    # pass ProxiedPeek to KeysView to maintain consistency
+    def keys(self):
+        return KeysView(ProxiedPeek(self))
+
+    def values(self):
+        return ValuesView(ProxiedPeek(self))
+
+    def items(self):
+        return ItemsView(ProxiedPeek(self))
+
+    # maintain consistency with Python 2
+    iteritems = items
+    itervalues = values
+    iterkeys = keys

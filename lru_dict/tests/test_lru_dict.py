@@ -57,6 +57,25 @@ def test_resize_truncates_if_smaller():
 
     assert all(i not in l for i in [0,1])
 
+def test_values_doesnt_affect_lru():
+    existing = make_existing_iterable(10)
+    l = lru_dict(size=10, existing=existing)
+    prev_mru = l.mru
+    vi = iter(l.values())
+    next(vi)
+
+    assert prev_mru == l.mru
+
+def test_items_doesnt_affect_lru():
+    existing = make_existing_iterable(10)
+    l = lru_dict(size=10, existing=existing)
+    prev_mru = l.mru
+    vi = iter(l.items())
+    next(vi)
+
+    assert prev_mru == l.mru
+
+
 def test_equality():
     existing = make_existing_iterable(5)
     l = lru_dict(size=5, existing=existing)

@@ -15,7 +15,7 @@ class lru_dict(MutableMapping):
     accessed item is bumped off the stack and out of the interal dict storage.
 
     >>> cache = lru_dict(size=5)
-    >>> cache.update{i:i for i in range(6)})
+    >>> cache.update({i:i for i in range(6)})
     >>> list(cache.keys())
     ... [1, 2, 3, 4, 5]
 
@@ -101,7 +101,9 @@ class lru_dict(MutableMapping):
                 del self._data[key]
             self._stack = self._stack[-self.size:]
 
+    # is this needed?
     def __eq__(self, other):
+        "Check if this and another LRU are equal in size and LRU order."
         if isinstance(other, lru_dict):
             return self.size == other.size and \
                    self.filled == other.filled and \
@@ -135,7 +137,8 @@ class lru_dict(MutableMapping):
         "Removes an arbitrary item from the cache and stack."
         del self._data[key]
         self._stack.pop(self._stack.index(key))
-    
+
+    # checking in the dict is faster than stack
     def __contains__(self, value):
         return value in self._data
 
